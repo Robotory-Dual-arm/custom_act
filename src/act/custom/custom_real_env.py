@@ -44,7 +44,7 @@ class RealEnv:
     """
 
     # def __init__(self, init_node, setup_robots=True):
-    def __init__(self, init_node):
+    def __init__(self, init_node = True):
         # self.follower_bot = InterbotixManipulatorXS(robot_model="vx300s", group_name="recorder_arm", gripper_name="gripper",
         #                                                robot_name=f'puppet_left', init_node=init_node)
 

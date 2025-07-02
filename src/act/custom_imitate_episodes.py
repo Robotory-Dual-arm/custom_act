@@ -332,7 +332,9 @@ def eval_bc(config, ckpt_name, save_episode=True):
 
 
         highest_rewards.append(episode_highest_reward)
+        print("#"*70)
         print(f'Rollout {rollout_id}\n{episode_return=}, {episode_highest_reward=}, {env_max_reward=}, Success: {episode_highest_reward==env_max_reward}')
+        print("#"*70)
 
         # if save_episode:
         #     save_videos(image_list, DT, video_path=os.path.join(ckpt_dir, f'video{rollout_id}.mp4'))

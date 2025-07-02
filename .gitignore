@@ -1,11 +1,17 @@
 # 빌드 및 개발 관련 디렉토리
 include/
 
+# Checkpoint and training data folders
+src/act/checkpoint/
+src/act/data/
+
 # 파이썬 캐시 및 임시파일
 __pycache__/
 *.pyc
 *.pyo
 *.pyd
+**/__pycache__/
+**/*.pyc
 
 # VSCode 설정 파일
 .vscode/

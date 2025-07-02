@@ -88,6 +88,7 @@ class ImageRecorder:
                 # 
                 frames0 = self.pipeline0.wait_for_frames(timeout_ms=2000)
                 frames1 = self.pipeline1.wait_for_frames(timeout_ms=2000)
+                
                 # 
                 if not frames0 or not frames1:
                     print("[DEBUG] Frame(s) is None")
@@ -98,7 +99,7 @@ class ImageRecorder:
                 if color0 and color1:
                     return {
                         'cam_high': np.asanyarray(color0.get_data()),
-                        'cam_low': np.asanyarray(color1.get_data())
+                        'cam_low': np.asanyarray(color1.get_data()),
                     }
             except Exception as e:
                 print(f"[WARN] Frame fetch failed: {e}")
@@ -196,6 +197,7 @@ MAX_GRIP = 1100.0
 
 class Recorder:
     def __init__(self, init_node=True, is_debug=False):
+        print("[DEBUG] Initializing Recorder")
         self.is_debug = is_debug
         self.qpos = None
         self.joint_deg = None
@@ -241,8 +243,10 @@ class Recorder:
         else:
             delta_grip_norm = (self.curr_gripper - self.prev_gripper) / MAX_GRIP
         self.prev_gripper = self.curr_gripper
-
-        return np.concatenate([joint_rad, [delta_grip_norm]])
+        
+        curr_qpos = np.concatenate([joint_rad, [delta_grip_norm]])
+        print(f"[DEBUG] Current qpos: {curr_qpos}")
+        return curr_qpos
 
     def set_joint_positions(self, joint_rad: np.ndarray, delta_theta_max=np.deg2rad(5.0)):
         """
