@@ -9,6 +9,7 @@ import matplotlib.pyplot as plt
 from copy import deepcopy
 from tqdm import tqdm
 from einops import rearrange
+import time
 
 from custom.custom_constants import DT
 # from constants import PUPPET_GRIPPER_JOINT_OPEN
@@ -96,7 +97,7 @@ def main(args):
         ckpt_names = [f'policy_best.ckpt']
         results = []
         for ckpt_name in ckpt_names:
-            success_rate, avg_return = eval_bc(config, ckpt_name, save_episode=True)
+            success_rate, avg_return = eval_bc(config, ckpt_name, save_episode=False)
             results.append([ckpt_name, success_rate, avg_return])
 
         for ckpt_name, success_rate, avg_return in results:
@@ -142,25 +143,52 @@ def make_optimizer(policy_class, policy):
     return optimizer
 
 
-def get_image(ts, camera_names):
-    curr_images = []
-    for cam_name in camera_names:
+# def get_image(ts, camera_names):
+#     curr_images = []
+#     for cam_name in camera_names:
 
-        # 디버깅 용 추가
-        img = ts.observation['images'].get(cam_name, None)
-        if img is None:
-            print(f"[SKIP] Camera '{cam_name}' returned None.")
-            return None  # 이미지 못 받았으면 None 리턴
-        # 디버깅 용 추가 끝
+#         # 디버깅 용 추가
+#         img = ts.observation['images'].get(cam_name, None)
+#         if img is None:
+#             print(f"[SKIP] Camera '{cam_name}' returned None.")
+#             return None  # 이미지 못 받았으면 None 리턴
+#         # 디버깅 용 추가 끝
 
-        curr_image = rearrange(ts.observation['images'][cam_name], 'h w c -> c h w')
-        curr_images.append(curr_image)
-    curr_image = np.stack(curr_images, axis=0)
-    curr_image = torch.from_numpy(curr_image / 255.0).float().cuda().unsqueeze(0)
-    return curr_image
+#         curr_image = rearrange(ts.observation['images'][cam_name], 'h w c -> c h w')
+#         curr_images.append(curr_image)
+#     curr_image = np.stack(curr_images, axis=0)
+#     curr_image = torch.from_numpy(curr_image / 255.0).float().cuda().unsqueeze(0)
+#     return curr_image
+
+def get_image(ts, camera_names, retries=5, wait_sec=0.2):
+    for attempt in range(retries):
+        curr_images = []
+        all_ready = True
+
+        for cam_name in camera_names:
+            img = ts.observation['images'].get(cam_name, None)
+            if img is None:
+                print(f"[RETRY {attempt+1}] Camera '{cam_name}' returned None.")
+                all_ready = False
+                break  # 한 개라도 없으면 다음 retry 시도
+
+        if all_ready:
+            # 모든 카메라의 이미지가 준비된 경우만 진행
+            for cam_name in camera_names:
+                img = ts.observation['images'][cam_name]
+                curr_image = rearrange(img, 'h w c -> c h w')
+                curr_images.append(curr_image)
+            curr_image = np.stack(curr_images, axis=0)
+            curr_image = torch.from_numpy(curr_image / 255.0).float().cuda().unsqueeze(0)
+            return curr_image
+
+        time.sleep(wait_sec)
+
+    print(f"[ERROR] get_image() failed after {retries} retries.")
+    return None
 
 
-def eval_bc(config, ckpt_name, save_episode=True):
+def eval_bc(config, ckpt_name, save_episode=False):
     set_seed(1000)
     ckpt_dir = config['ckpt_dir']
     state_dim = config['state_dim']
@@ -215,6 +243,7 @@ def eval_bc(config, ckpt_name, save_episode=True):
     episode_returns = []
     highest_rewards = []
     for rollout_id in range(num_rollouts):
+        print(f"[DEBUG] Rollout {rollout_id} started")
         rollout_id += 0
         ### set task
         # 사용 X
@@ -226,8 +255,11 @@ def eval_bc(config, ckpt_name, save_episode=True):
         # task 추가
         elif 'rb_transfer_can' in task_name:
             pass
-
+        
+        print(f"[DEBUG_reset] Resetting environment for rollout {rollout_id}")
         ts = env.reset()
+        print(f"[DEBUG_reset] obs_image.shape: {ts.observation['images']['cam_high'].shape}, {ts.observation['images']['cam_low'].shape} for rollout {rollout_id}")
+        print(f"[DEBUG_reset] Environment reset complete for rollout {rollout_id}")
 
         ### onscreen render <- 사용 X
         # if onscreen_render:
@@ -254,6 +286,7 @@ def eval_bc(config, ckpt_name, save_episode=True):
                 #     plt.pause(DT)
 
                 ### process previous timestep to get qpos and image_list
+                print(f"[DEBUG_Inference] Processing timestep {t} for rollout {rollout_id}")
                 obs = ts.observation
                 if 'images' in obs:
                     image_list.append(obs['images'])
@@ -263,12 +296,15 @@ def eval_bc(config, ckpt_name, save_episode=True):
                 qpos = pre_process(qpos_numpy)
                 qpos = torch.from_numpy(qpos).float().cuda().unsqueeze(0)
                 qpos_history[:, t] = qpos
+                print(f"[DEBUG_Inference_image] Processed timestep {t} for rollout {rollout_id}")
                 curr_image = get_image(ts, camera_names)
                 # 디버깅 용 추가
                 if curr_image is None:
                     print("[SKIP] Skipping timestep due to missing image.")
                     continue
-                # 디버깅 용 추가 끝
+                else:
+                    print(f"[DEBUG_Inference_image] Current image shape: {curr_image.shape} for rollout {rollout_id}")
+                # 디버깅 용 추가
 
                 ### query policy
                 if config['policy_class'] == "ACT":
@@ -295,10 +331,12 @@ def eval_bc(config, ckpt_name, save_episode=True):
                 raw_action = raw_action.squeeze(0).cpu().numpy()
                 action = post_process(raw_action)
                 target_qpos = action
+                print(f"[DEBUG_Inference_action] Action shape: {action.shape} for rollout {rollout_id}")
 
                 ### step the environment
                 # action을 실행하게 하는 부분
                 ts = env.step(target_qpos)
+                print(f"[DEBUG_action] Action taken for timestep {t} in rollout {rollout_id} \n")
 
                 ### for visualization
                 qpos_list.append(qpos_numpy)

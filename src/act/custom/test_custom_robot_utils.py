@@ -30,10 +30,22 @@ def get_device_serials():
 # serial_d405 = serials[0]
 # serial_d435 = serials[1]
 
+import threading
+import time
+
+import pyrealsense2 as rs
+import numpy as np
+import threading
+import time
+
 class ImageRecorder:
     def __init__(self, serial_d405, serial_d435):
         print("[DEBUG] Initializing ImageRecorder")
         print(f"[DEBUG] serial_d405 = {serial_d405}, serial_d435 = {serial_d435}")
+
+        self.cam_high_frame = None
+        self.cam_low_frame = None
+        self.running = True
 
         # D405
         self.pipeline0 = rs.pipeline()
@@ -41,7 +53,6 @@ class ImageRecorder:
         config0.enable_device(serial_d405)
         config0.enable_stream(rs.stream.color, 640, 480, rs.format.bgr8, 30)
         time.sleep(5.0)
-        # self.pipeline0.start(config0)
 
         try:
             self.pipeline0.start(config0)
@@ -53,13 +64,12 @@ class ImageRecorder:
             self.pipeline0.start(config0)
         time.sleep(1.0)
 
-        # 추가적으로 warm-up
         for _ in range(30):
             try:
                 self.pipeline0.wait_for_frames(timeout_ms=100)
             except:
                 continue
-        
+
         # D435
         self.pipeline1 = rs.pipeline()
         config1 = rs.config()
@@ -68,7 +78,6 @@ class ImageRecorder:
         self.pipeline1.start(config1)
         time.sleep(1.0)
 
-        # 안정화 대기 추가
         print("[INFO] Waiting for camera streams to stabilize...")
         for _ in range(30):
             try:
@@ -78,34 +87,146 @@ class ImageRecorder:
                 print(f"[WARN] Skipping unstable frame: {e}")
             time.sleep(0.05)
         print("[INFO] Camera warm-up done.")
-    
-    # 디버깅 용도
-    def get_images(self):
-        for retry in range(3):
+
+        # Start background thread
+        self.thread = threading.Thread(target=self._update_frames, daemon=True)
+        self.thread.start()
+
+    def _update_frames(self):
+        while self.running:
             try:
-                # 
-                print("[DEBUG] Trying to fetch frames")
-                # 
-                frames0 = self.pipeline0.wait_for_frames(timeout_ms=2000)
-                frames1 = self.pipeline1.wait_for_frames(timeout_ms=2000)
-                
-                # 
-                if not frames0 or not frames1:
-                    print("[DEBUG] Frame(s) is None")
-                    return {'cam_high': None, 'cam_low': None}
-                # 
+                frames0 = self.pipeline0.wait_for_frames(timeout_ms=1000)
+                frames1 = self.pipeline1.wait_for_frames(timeout_ms=1000)
                 color0 = frames0.get_color_frame()
                 color1 = frames1.get_color_frame()
                 if color0 and color1:
-                    return {
-                        'cam_high': np.asanyarray(color0.get_data()),
-                        'cam_low': np.asanyarray(color1.get_data()),
-                    }
+                    self.cam_high_frame = np.asanyarray(color0.get_data())
+                    self.cam_low_frame = np.asanyarray(color1.get_data())
             except Exception as e:
-                print(f"[WARN] Frame fetch failed: {e}")
-                time.sleep(0.1)
-        print("[ERROR] Failed to get images after retries")
-        return {'cam_high': None, 'cam_low': None}
+                print(f"[WARN] Background frame update failed: {e}")
+            time.sleep(0.01)  # 100Hz update rate
+
+    def get_images(self):
+        if self.cam_high_frame is None or self.cam_low_frame is None:
+            print("[WARN] One or both frames not available yet.")
+            return {'cam_high': None, 'cam_low': None}
+        return {
+            'cam_high': self.cam_high_frame.copy(),
+            'cam_low': self.cam_low_frame.copy()
+        }
+
+    def shutdown(self):
+        print("[INFO] Shutting down ImageRecorder...")
+        self.running = False
+        self.thread.join(timeout=2.0)
+        self.pipeline0.stop()
+        self.pipeline1.stop()
+        print("[INFO] ImageRecorder shutdown complete.")
+
+
+# class ImageRecorder:
+#     def __init__(self, serial_d405, serial_d435):
+#         print("[DEBUG] Initializing ImageRecorder")
+#         print(f"[DEBUG] serial_d405 = {serial_d405}, serial_d435 = {serial_d435}")
+
+#         # D405
+#         self.pipeline0 = rs.pipeline()
+#         config0 = rs.config()
+#         config0.enable_device(serial_d405)
+#         config0.enable_stream(rs.stream.color, 640, 480, rs.format.bgr8, 30)
+#         time.sleep(5.0)
+#         # self.pipeline0.start(config0)
+
+#         try:
+#             self.pipeline0.start(config0)
+#         except RuntimeError:
+#             print("Retrying D405 pipeline start after reconfig...")
+#             time.sleep(1.0)
+#             self.pipeline0.stop()
+#             self.pipeline0 = rs.pipeline()
+#             self.pipeline0.start(config0)
+#         time.sleep(1.0)
+
+#         # 추가적으로 warm-up
+#         for _ in range(30):
+#             try:
+#                 self.pipeline0.wait_for_frames(timeout_ms=100)
+#             except:
+#                 continue
+        
+#         # D435
+#         self.pipeline1 = rs.pipeline()
+#         config1 = rs.config()
+#         config1.enable_device(serial_d435)
+#         config1.enable_stream(rs.stream.color, 640, 480, rs.format.bgr8, 30)
+#         self.pipeline1.start(config1)
+#         time.sleep(1.0)
+
+#         # 안정화 대기 추가
+#         print("[INFO] Waiting for camera streams to stabilize...")
+#         for _ in range(30):
+#             try:
+#                 self.pipeline0.wait_for_frames(timeout_ms=1000)
+#                 self.pipeline1.wait_for_frames(timeout_ms=1000)
+#             except Exception as e:
+#                 print(f"[WARN] Skipping unstable frame: {e}")
+#             time.sleep(0.05)
+#         print("[INFO] Camera warm-up done.")
+    
+#     # 디버깅 용도
+#     def get_images(self):
+#         max_retries = 10
+#         for retry in range(max_retries):
+#             try:
+#                 print(f"[DEBUG] Trying to fetch frames (attempt {retry+1})")
+#                 frames0 = self.pipeline0.wait_for_frames(timeout_ms=2000)
+#                 frames1 = self.pipeline1.wait_for_frames(timeout_ms=2000)
+
+#                 if not frames0 or not frames1:
+#                     print("[DEBUG] One or more frames is None")
+#                     continue
+
+#                 color0 = frames0.get_color_frame()
+#                 color1 = frames1.get_color_frame()
+#                 if color0 is not None and color1 is not None:
+#                     return {
+#                         'cam_high': np.asanyarray(color0.get_data()),
+#                         'cam_low': np.asanyarray(color1.get_data()),
+#                     }
+
+#             except Exception as e:
+#                 print(f"[WARN] Frame fetch failed (attempt {retry+1}): {e}")
+#                 time.sleep(0.1)
+
+#         print("[ERROR] Failed to get images after retries")
+#         return {'cam_high': None, 'cam_low': None}
+
+    # def get_images(self):
+    #     for retry in range(3):
+    #         try:
+    #             # 
+    #             print("[DEBUG] Trying to fetch frames")
+    #             # 
+    #             frames0 = self.pipeline0.wait_for_frames(timeout_ms=2000)
+    #             frames1 = self.pipeline1.wait_for_frames(timeout_ms=2000)
+                
+    #             # 
+    #             if not frames0 or not frames1:
+    #                 print("[DEBUG] Frame(s) is None")
+    #                 return {'cam_high': None, 'cam_low': None}
+    #             # 
+    #             color0 = frames0.get_color_frame()
+    #             color1 = frames1.get_color_frame()
+    #             if color0 and color1:
+    #                 return {
+    #                     'cam_high': np.asanyarray(color0.get_data()),
+    #                     'cam_low': np.asanyarray(color1.get_data()),
+    #                 }
+    #         except Exception as e:
+    #             print(f"[WARN] Frame fetch failed: {e}")
+    #             time.sleep(0.1)
+    #     print("[ERROR] Failed to get images after retries")
+    #     return {'cam_high': None, 'cam_low': None}
     
     # def get_images(self):
     #     print("[DEBUG] waiting for frame0")
@@ -189,7 +310,7 @@ from robotory_rb10_rt.msg import OnRobotRGInput, OnRobotRGOutput
 
 import sys
 sys.path.append('/home/vision/catkin_ws/src/robotory_rb10_rt/scripts')  # 필요시 조정
-from api.cobot import GetCurrentSplitedJoint, SendCOMMAND, CMD_TYPE, ToCB
+from api.cobot import GetCurrentSplitedJoint, SendCOMMAND, CMD_TYPE, ToCB, SetProgramMode, PG_MODE
 
 
 MAX_GRIP = 1100.0
@@ -206,6 +327,12 @@ class Recorder:
         self.gripper_pub = None
 
         ToCB("192.168.111.50")  # ← 이 줄을 추가
+
+        mode = input("real? (y/n): ")
+        if mode == 'y':
+            SetProgramMode(PG_MODE.REAL)
+        else:
+            SetProgramMode(PG_MODE.SIMULATION)
 
         if init_node:
             rospy.init_node("custom_recorder", anonymous=True)
@@ -248,7 +375,7 @@ class Recorder:
         print(f"[DEBUG] Current qpos: {curr_qpos}")
         return curr_qpos
 
-    def set_joint_positions(self, joint_rad: np.ndarray, delta_theta_max=np.deg2rad(5.0)):
+    def set_joint_positions(self, joint_rad: np.ndarray, delta_theta_max=np.deg2rad(2.5)):
         """
         joint_rad (6,) → degree 변환 → cobot API 전송
         """
@@ -324,6 +451,7 @@ class Recorder:
             delta = np.clip(delta, -delta_theta_max, delta_theta_max)
             limited_pose = self.get_qpos()[:6] + delta
             self.set_joint_positions(limited_pose)
+            print(f"[DEBUG] Moving arm to {limited_pose}")
             time.sleep(DT)
 
     def move_gripper(self, target_grip, move_time=1.0):
@@ -342,6 +470,7 @@ class Recorder:
         for g in traj:
             delta_grip_norm = (g - self.curr_gripper) / MAX_GRIP
             self.set_gripper_pose(delta_grip_norm)
+            print(f"[DEBUG] Moving gripper to {delta_grip_norm}")
             time.sleep(DT)
 
 # Cam 두개 제대로 연결되는 지 확인하는 용도
