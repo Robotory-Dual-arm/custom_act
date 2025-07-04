@@ -9,11 +9,14 @@
 # d405 - cam_high
 # d435 - cam_low
 
+# cam_low: D405 - serials[0]
+# cam_high: D435 - serials[1]
 
 import pyrealsense2 as rs
 import numpy as np
 
-DT = 0.05 # 20Hz (수정)
+# DT = 0.05 # 20Hz (수정)
+DT = 0.02 # 50Hz(ACT 원본)
 
 
 def get_device_serials():
@@ -100,8 +103,8 @@ class ImageRecorder:
                 color0 = frames0.get_color_frame()
                 color1 = frames1.get_color_frame()
                 if color0 and color1:
-                    self.cam_high_frame = np.asanyarray(color0.get_data())
-                    self.cam_low_frame = np.asanyarray(color1.get_data())
+                    self.cam_low_frame = np.asanyarray(color0.get_data())
+                    self.cam_high_frame = np.asanyarray(color1.get_data())
             except Exception as e:
                 print(f"[WARN] Background frame update failed: {e}")
             time.sleep(0.01)  # 100Hz update rate
@@ -485,13 +488,13 @@ if __name__ == "__main__":
 
     while True:
         images = image_recorder.get_images()
-        cam_high = images['cam_high']
         cam_low = images['cam_low']
+        cam_high = images['cam_high']
 
-        if cam_high is not None:
-            cv2.imshow('cam_high (D405)', cam_high)
         if cam_low is not None:
-            cv2.imshow('cam_low (D435)', cam_low)
+            cv2.imshow('cam_low (D405)', cam_low)
+        if cam_high is not None:
+            cv2.imshow('cam_high (D435)', cam_high)
 
         key = cv2.waitKey(1)
         if key == ord('q'):

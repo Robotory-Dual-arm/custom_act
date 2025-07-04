@@ -1,4 +1,7 @@
-#!/usr/bin/env python3
+#!/home/vision/anaconda3/envs/aloha/bin/python
+
+# cam_low: D405 - serials[0]
+# cam_high: D435 - serials[1]
 
 # 수정 List:
 # 1. action에서 Leader, 그리퍼의 pos 받게 하기 <- Joint Copy 방법 설치되면 하기
@@ -21,6 +24,8 @@ import time
 from datetime import datetime
 import os
 
+# 모든 Demonstration 길이 동일하게 하기위해 추가
+FIXED_EPISODE_LEN = 1000
 
 def init_buffer():
     return {
@@ -38,13 +43,10 @@ def init_buffer():
         'action': []
     }
 
-# 모든 Demonstration 길이 동일하게 하기위해 추가
-FIXED_EPISODE_LEN = 250
-
 
 def save_to_hdf5(buffer, i=None):
     today = datetime.now().strftime('%m%d')  # '0616' 형식
-    data_dir = f'/home/vision/catkin_ws/src/teleop_data/act_data/{today}'
+    data_dir = f'/home/vision/catkin_ws/src/custom_act/src/act/data/rb_transfer_can/{today}'
     if not os.path.isdir(data_dir):
         os.makedirs(data_dir)
 
@@ -131,18 +133,20 @@ def main():
     # i=0
 
     serials = get_device_serials()
-    serial_d435 = serials[0]
-    serial_d405 = serials[1]
+    serial_d405 = serials[0]
+    serial_d435 = serials[1]
+    print(f"[DEBUG] serial_d405 = {serial_d405}, serial_d435 = {serial_d435}")
+
 
     pipeline0 = rs.pipeline()
     config0 = rs.config()
-    config0.enable_device(serial_d435)
+    config0.enable_device(serial_d405)
     config0.enable_stream(rs.stream.color, 640, 480, rs.format.bgr8, 30)
     pipeline0.start(config0)
 
     pipeline1 = rs.pipeline()
     config1 = rs.config()
-    config1.enable_device(serial_d405)
+    config1.enable_device(serial_d435)
     config1.enable_stream(rs.stream.color, 640, 480, rs.format.bgr8, 30)
     pipeline1.start(config1)
 
@@ -247,8 +251,8 @@ def main():
             image0 = color_image0.copy()
             image1 = color_image1.copy()
 
-            buffer['observations']['images']['cam_high'].append(image0)
-            buffer['observations']['images']['cam_low'].append(image1)
+            buffer['observations']['images']['cam_low'].append(image0)
+            buffer['observations']['images']['cam_high'].append(image1)
 
 
             ## action 계산 (Leader의 qpos)
@@ -266,6 +270,13 @@ def main():
             buffer['action'].append(action)
 
         elif not recording and len(buffer['action']) > 0:
+            # padding 위치 먼저 출력
+            real_len = len(buffer['action'])
+            if real_len < FIXED_EPISODE_LEN:
+                print(f"⚠️ Padding은 timestep {real_len}부터 시작됩니다.")
+            else:
+                print("✅ 이 demonstration에는 padding이 없습니다.")
+
             while True:
                 data_store = input("Store demo data? (y/n): ").strip().lower()
                 if data_store.strip() == 'y':

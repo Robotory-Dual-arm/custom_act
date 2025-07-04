@@ -1,10 +1,20 @@
+#!/home/vision/anaconda3/envs/aloha/bin/python
+
 import h5py
 import pandas as pd
 import matplotlib.pyplot as plt
+from datetime import datetime
+import numpy as np
+
+
+today = datetime.now().strftime('%m%d') 
 
 # 파일 경로 (현재 디렉토리에 있는 경우)
-# file_path = "/home/chem/act/data/rb_transfer_can/episode_3.hdf5"
-file_path = "/home/vision/catkin_ws/src/act/data/rb_transfer_can/episode_3.hdf5"
+file_dir = "/home/vision/catkin_ws/src/custom_act/src/act/data/rb_transfer_can"
+file_path = f"/{today}/episode_0.hdf5"
+
+# file_dir = "/home/vision/catkin_ws/src/teleop_data/act_data/0623"
+# file_path = f"/episode_0.hdf5"
 
 
 # HDF5 구조 탐색 함수
@@ -25,13 +35,20 @@ def explore_hdf5_structure(g, path="/"):
     return structure
 
 # 데이터 읽기
-with h5py.File(file_path, 'r') as f:
+with h5py.File(file_dir+file_path, 'r') as f:
 
     cam_high_data = f['/observations/images/cam_high'][:]
     cam_low_data = f['/observations/images/cam_low'][:]
     qpos_data = f['/observations/qpos'][:]
     action_data = f['/action'][:]
+    is_pad = f['/is_pad'][:]  # 추가
 
+# 패딩 시작 인덱스 확인
+if np.any(is_pad):
+    pad_start_idx = np.argmax(is_pad)
+    print(f"⚠️ Padding은 timestep {pad_start_idx}부터 시작됩니다.")
+else:
+    print("✅ 이 데이터에는 padding이 없습니다.")
 
 # qpos/action을 DataFrame으로 변환
 action_columns = [f"action_{i}" for i in range(6)] + ["action_gripper"]
@@ -47,19 +64,19 @@ print("✅ qpos + action 데이터를 'qpos_action_full.csv'로 저장했습니�
 
 # 이미지 시각화 (첫 프레임)
 fig, axes = plt.subplots(1, 2, figsize=(8, 4))
-axes[0].imshow(cam_high_data[0])
-axes[0].set_title("cam_high (frame 0)")
+axes[0].imshow(cam_low_data[0])
+axes[0].set_title("cam_low (frame 0)")
 axes[0].axis('off')
 
-axes[1].imshow(cam_low_data[0])
-axes[1].set_title("cam_low (frame 0)")
+axes[1].imshow(cam_high_data[0])
+axes[1].set_title("cam_high (frame 1)")
 axes[1].axis('off')
 
 plt.tight_layout()
 plt.show()
 
 # 구조 출력
-with h5py.File(file_path, 'r') as f:
+with h5py.File(file_dir+file_path, 'r') as f:
     structure = explore_hdf5_structure(f)
     print("\n📁 HDF5 파일 구조:")
     for k, v in structure.items():

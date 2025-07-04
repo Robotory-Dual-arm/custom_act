@@ -17,14 +17,14 @@ TASK_CONFIGS = {
     'rb_transfer_can':{
         'dataset_dir': DATA_DIR + '/rb_transfer_can',
         'num_episodes': 50,
-        'episode_len': 250,
+        'episode_len': 1000,
         'camera_names': ['cam_high', 'cam_low']
     },
 }
 
 ### ALOHA fixed constants
-# DT = 0.02 # 50Hz(ACT 원본)
-DT = 0.05 # 20Hz (수정)
+DT = 0.02 # 50Hz(ACT 원본)
+# DT = 0.05 # 20Hz (수정)
 
 # 원본
 # JOINT_NAMES = ["waist", "shoulder", "elbow", "forearm_roll", "wrist_angle", "wrist_rotate"]

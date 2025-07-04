@@ -15,7 +15,10 @@ import dm_env
 # from custom_constants import DT, START_ARM_POSE
 
 START_ARM_POSE = [1.570796, 0, -1.570796, 0, 4.712388, 0, 1] # 초기 위치 정해서 rad으로 입력 필요
-DT = 0.05 # 20Hz (수정)
+# DT = 0.05 # 20Hz (수정)
+DT = 0.02 # 50Hz(ACT 원본)
+
+
 from custom.custom_constants import DT, START_ARM_POSE
 # from custom_constants import DT, START_ARM_POSE, MASTER_GRIPPER_JOINT_NORMALIZE_FN, PUPPET_GRIPPER_JOINT_UNNORMALIZE_FN
 # from custom_constants import PUPPET_GRIPPER_POSITION_NORMALIZE_FN, PUPPET_GRIPPER_VELOCITY_NORMALIZE_FN
