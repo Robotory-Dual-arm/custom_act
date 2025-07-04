@@ -23,10 +23,12 @@
     PICO
     roslaunch onrobot_rg_control bringup.launch gripper:=rg2 ip:=192.168.1.1
 
+
     PICO
     rosrun onrobot_rg_control potentiometer_combined.py
 ### VR + Manipulator 
     roslaunch vive_ros vive.launch
+
 
     rosrun robotory_rb10_rt servo_vr.py
 ### Record data
@@ -37,7 +39,6 @@
 ## Train
 1. Move the dataset to <DATA_DIR>/<TASK_NAME>
 2. Make 'checkpoint' directory at act directory.
-
     conda activate aloha
     rosrun custom_act custom_imitate_episodes.py \
     --task_name rb_transfer_can \
@@ -52,7 +53,7 @@
     PICO
     roslaunch onrobot_rg_control bringup.launch gripper:=rg2 ip:=192.168.1.1
 
-# Run
+### Run
     conda activate aloha
     rosrun custom_act custom_imitate_episodes.py \
     --eval \
