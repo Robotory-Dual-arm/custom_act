@@ -439,7 +439,7 @@ class Recorder:
 
     # 추가해야 되는 것
     # reset 시킬때만 Joint 움직이게 하는 메소드
-    def move_arm(self, target_pose, move_time=1.0, delta_theta_max=np.deg2rad(5.0)):
+    def move_arm(self, target_pose, move_time=1.0, delta_theta_max=np.deg2rad(7.0)):
         # from custom_constants import DT
 
         """

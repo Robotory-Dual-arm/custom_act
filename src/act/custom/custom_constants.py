@@ -16,7 +16,7 @@ TASK_CONFIGS = {
     # },
     'rb_transfer_can':{
         'dataset_dir': DATA_DIR + '/rb_transfer_can',
-        'num_episodes': 50,
+        'num_episodes': 100,
         'episode_len': 1000,
         'camera_names': ['cam_high', 'cam_low']
     },
@@ -33,7 +33,8 @@ DT = 0.02 # 50Hz(ACT 원본)
 # Custom
 JOINT_NAMES = ["base", "shoulder", "elbow", "wrist1", "wrist2", "wrist3"]
 # START_ARM_POSE = [1.570796, 0, -1.570796, 0, -1.570796, 0, 1] # 초기 위치 정해서 rad으로 입력 필요
-START_ARM_POSE = [1.570796, 0, -1.570796, 0, 4.712388, 0, 1] # 초기 위치 정해서 rad으로 입력 필요
+# [65 -13 -100 30 270 40 1]
+START_ARM_POSE = [1.13446, -0.22689, -1.745329, 0.5236, 4.712388, 0.698132, 1] # 초기 위치 정해서 rad으로 입력 필요
 
 # START_ARM_POSE = [base", "shoulder", "elbow", "wrist1", "wrist2", "wrist3, "gripper"]
 
