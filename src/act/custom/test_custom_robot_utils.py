@@ -375,7 +375,7 @@ class Recorder:
         print(f"[DEBUG] Current qpos: {curr_qpos}")
         return curr_qpos
 
-    def set_joint_positions(self, joint_rad: np.ndarray, delta_theta_max=np.deg2rad(2.5)):
+    def set_joint_positions(self, joint_rad: np.ndarray, delta_theta_max=np.deg2rad(5.0)):
         """
         joint_rad (6,) → degree 변환 → cobot API 전송
         """
@@ -436,7 +436,7 @@ class Recorder:
 
     # 추가해야 되는 것
     # reset 시킬때만 Joint 움직이게 하는 메소드
-    def move_arm(self, target_pose, move_time=1.0, delta_theta_max=np.deg2rad(7.0)):
+    def move_arm(self, target_pose, move_time=1.0, delta_theta_max=np.deg2rad(5.5)):
         # from custom_constants import DT
 
         """
