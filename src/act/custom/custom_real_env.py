@@ -1,8 +1,8 @@
-# 1. self.follower_bot 정의 <- rb, gripper와 연결하는 클래스로 custom_robot_utils.py에서 정의
+# 1. self.follower_bot 정의 <- rb, gripper와 연결하는 클래스로 test_custom_robot_utils.py에서 정의 (완)
 # 2. Dual Arm -> Single Arm으로 변경 (완)
-# 3. 제어 명령어들 수정
+# 3. 제어 명령어들 수정 (완)
 # 4. 사용하지 않는 observation들 처리 (완)
-# 5. RB10, 그리퍼 Data Subscribe <- get_
+# 5. RB10, 그리퍼 Data Subscribe <- @test_custom_robot_utils.py에서 정의 (완)
 # 6. RB10, 그리퍼에 Action Publish <- step 메소드에서 실행
 
 

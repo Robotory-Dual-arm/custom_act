@@ -45,7 +45,7 @@ def init_buffer():
 
 
 def save_to_hdf5(buffer, i=None):
-    today = datetime.now().strftime('%m%d')  # '0616' 형식
+    today = datetime.now().strftime('%m%d')
     data_dir = f'/home/vision/catkin_ws/src/custom_act/src/act/data/rb_transfer_can/{today}'
     if not os.path.isdir(data_dir):
         os.makedirs(data_dir)

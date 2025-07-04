@@ -1,13 +1,10 @@
 #!/home/vision/anaconda3/envs/aloha/bin/python
 
-#  send_joint_command()와 send_gripper_command() 함수 구현 (실제 API 또는 통신 방식)
+#  send_joint_command()와 send_gripper_command() 함수 구현 (실제 API 또는 통신 방식) <- 완
+#  초기화 및 리셋 함수 (move_arms, move_grippers)도 환경에 맞게 구성 <- 완
+#  inference에서 get_qpos() → policy → set_joint_positions, set_gripper_pose()로 연결되는 흐름 구성 <- 완
 
-#  초기화 및 리셋 함수 (move_arms, move_grippers)도 환경에 맞게 구성
-
-#  inference에서 get_qpos() → policy → set_joint_positions, set_gripper_pose()로 연결되는 흐름 구성
-
-# d405 - cam_high
-# d435 - cam_low
+# get_images()로 비동기 방식으로 계속 camera data 갖고옴
 
 # cam_low: D405 - serials[0]
 # cam_high: D435 - serials[1]

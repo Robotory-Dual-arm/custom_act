@@ -1,12 +1,16 @@
 # 수정해줘야 할 부분
 # 1. START_ARM_POSE <- 초기 위치 정해서 rad으로 입력 필요
-# 2. Helper functions, 그리퍼 범위 제한 <- 그리퍼 개폐 계산 함수 생성
+# 2. Helper functions <- 사용 X
 
 ### Task parameters
 
 # DATA_DIR = '<put your data dir here>'
-# DATA_DIR = '/home/chem/act/data'
-DATA_DIR = '/home/vision/catkin_ws/src/custom_act/src/act/data'
+
+# 개인 PC
+DATA_DIR = '/home/chem/vision_custom_act/src/act/data'
+
+# vision PC
+# DATA_DIR = '/home/vision/catkin_ws/src/custom_act/src/act/data'
 TASK_CONFIGS = {
     # 'aloha_wear_shoe':{
     #     'dataset_dir': DATA_DIR + '/aloha_wear_shoe',
@@ -35,7 +39,6 @@ JOINT_NAMES = ["base", "shoulder", "elbow", "wrist1", "wrist2", "wrist3"]
 # START_ARM_POSE = [1.570796, 0, -1.570796, 0, -1.570796, 0, 1] # 초기 위치 정해서 rad으로 입력 필요
 # [65 -13 -100 30 270 40 1]
 START_ARM_POSE = [1.13446, -0.22689, -1.745329, 0.5236, 4.712388, 0.698132, 1] # 초기 위치 정해서 rad으로 입력 필요
-
 # START_ARM_POSE = [base", "shoulder", "elbow", "wrist1", "wrist2", "wrist3, "gripper"]
 
 # Left finger position limits (qpos[7]), right_finger = -1 * left_finger
