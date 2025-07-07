@@ -21,7 +21,7 @@ TASK_CONFIGS = {
     'rb_transfer_can':{
         'dataset_dir': DATA_DIR + '/rb_transfer_can',
         'num_episodes': 100,
-        'episode_len': 500,
+        'episode_len': 600,
         'camera_names': ['cam_high', 'cam_low']
     },
 }
@@ -39,6 +39,8 @@ JOINT_NAMES = ["base", "shoulder", "elbow", "wrist1", "wrist2", "wrist3"]
 # START_ARM_POSE = [1.570796, 0, -1.570796, 0, -1.570796, 0, 1] # 초기 위치 정해서 rad으로 입력 필요
 # [65 -13 -100 30 270 40 1]
 START_ARM_POSE = [1.0472, -0.4537856, -1.72876, 0.645772, 4.799655, 0.925, 0] # 초기 위치 정해서 rad으로 입력 필요
+# [60 -26 -100 37 275 53 1]
+
 # START_ARM_POSE = [base", "shoulder", "elbow", "wrist1", "wrist2", "wrist3, "gripper"]
 
 # Left finger position limits (qpos[7]), right_finger = -1 * left_finger
