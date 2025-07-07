@@ -13,7 +13,7 @@ sys.path.append('/home/vision/catkin_ws/src/robotory_rb10_rt/scripts')
 import h5py
 import rospy
 import numpy as np
-from teleop_data.msg import OnRobotRGOutput
+from teleop_data.msg import OnRobotRGOutput, OnRobotRGInput
 from pynput import keyboard
 from api.cobot import *
 from rb import *
@@ -106,7 +106,8 @@ def save_to_hdf5(buffer, i=None):
 
 def gripper_callback(msg):
     global latest_gripper_qpos
-    latest_gripper_qpos = [msg.rGWD]
+    # latest_gripper_qpos = [msg.rGWD]
+    latest_gripper_qpos = [msg.gGWD]
 
 def on_press(key):
     global recording, terminal
@@ -165,7 +166,10 @@ def main():
     latest_gripper_qpos = None
 
     rospy.init_node("hdf_maker2")
-    rospy.Subscriber("/OnRobotRGOutput", OnRobotRGOutput, gripper_callback)
+    # rospy.Subscriber("/OnRobotRGOutput", OnRobotRGOutput, gripper_callback)
+    rospy.Subscriber("/OnRobotRGInput", OnRobotRGInput, gripper_callback)
+
+
 
     listener = keyboard.Listener(on_press=on_press)
     listener.start()
@@ -190,6 +194,28 @@ def main():
             rospy.logwarn_throttle(5, "No gripper data")
             rate.sleep()
             continue
+        
+        try:
+            frame0 = pipeline0.wait_for_frames(timeout_ms=2000)
+            frame1 = pipeline1.wait_for_frames(timeout_ms=2000)
+        except RuntimeError as e:
+            rospy.logwarn(f"Realsense timeout: {e}")
+            rate.sleep()
+            continue
+
+        color_frame0 = frame0.get_color_frame()
+        color_frame1 = frame1.get_color_frame()
+        if not color_frame0 or not color_frame1:
+            rospy.logwarn("No color frame from one of the cameras")
+            continue
+
+        color_image0 = np.asanyarray(color_frame0.get_data())
+        color_image1 = np.asanyarray(color_frame1.get_data())
+
+        # 실시간 이미지 확인용 화면 표시
+        cv2.imshow("D405 - cam_low", color_image0)
+        cv2.imshow("D435 - cam_high", color_image1)
+        cv2.waitKey(1)
 
         if recording:
             ## qpos <- Follower
@@ -221,22 +247,7 @@ def main():
             # robot_quat = [w, x, y, z]
 
             ## RGB Data
-            try:
-                frame0 = pipeline0.wait_for_frames(timeout_ms=2000)
-                frame1 = pipeline1.wait_for_frames(timeout_ms=2000)
-            except RuntimeError as e:
-                rospy.logwarn(f"Realsense timeout: {e}")
-                rate.sleep()
-                continue
 
-            color_frame0 = frame0.get_color_frame()
-            color_frame1 = frame1.get_color_frame()
-            if not color_frame0 or not color_frame1:
-                rospy.logwarn("No color frame from one of the cameras")
-                continue
-
-            color_image0 = np.asanyarray(color_frame0.get_data())
-            color_image1 = np.asanyarray(color_frame1.get_data())
 
             # Image shape 후처리
             # h, w = color_image0.shape[:2]
