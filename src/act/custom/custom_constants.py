@@ -21,7 +21,7 @@ TASK_CONFIGS = {
     'rb_transfer_can':{
         'dataset_dir': DATA_DIR + '/rb_transfer_can',
         'num_episodes': 100,
-        'episode_len': 1000,
+        'episode_len': 500,
         'camera_names': ['cam_high', 'cam_low']
     },
 }

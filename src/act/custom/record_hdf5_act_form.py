@@ -25,7 +25,11 @@ from datetime import datetime
 import os
 
 # 모든 Demonstration 길이 동일하게 하기위해 추가
-FIXED_EPISODE_LEN = 1000
+# FIXED_EPISODE_LEN = 500
+
+from custom_constants import TASK_CONFIGS
+task_config = TASK_CONFIGS['rb_transfer_can']
+FIXED_EPISODE_LEN = task_config['episode_len']
 
 def init_buffer():
     return {

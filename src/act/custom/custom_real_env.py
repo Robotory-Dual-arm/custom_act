@@ -14,9 +14,7 @@ import dm_env
 
 # from custom_constants import DT, START_ARM_POSE
 
-START_ARM_POSE = [1.570796, 0, -1.570796, 0, 4.712388, 0, 1] # 초기 위치 정해서 rad으로 입력 필요
-# DT = 0.05 # 20Hz (수정)
-DT = 0.02 # 50Hz(ACT 원본)
+
 
 
 from custom.custom_constants import DT, START_ARM_POSE
@@ -29,6 +27,11 @@ from custom.test_custom_robot_utils import get_device_serials, Recorder, ImageRe
 # from custom_robot_utils import setup_master_bot, setup_puppet_bot, move_arms, move_grippers
 # from interbotix_xs_modules.recorder_arm import InterbotixManipulatorXS
 # from interbotix_xs_msgs.msg import JointSingleCommand
+
+# START_ARM_POSE = [1.570796, 0, -1.570796, 0, 4.712388, 0, 1] # 초기 위치 정해서 rad으로 입력 필요
+# DT = 0.05 # 20Hz (수정)
+# DT = 0.02 # 50Hz(ACT 원본)
+
 
 import IPython
 e = IPython.embed

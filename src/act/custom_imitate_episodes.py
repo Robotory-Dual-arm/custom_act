@@ -10,6 +10,7 @@ from copy import deepcopy
 from tqdm import tqdm
 from einops import rearrange
 import time
+import cv2
 
 from custom.custom_constants import DT
 # from constants import PUPPET_GRIPPER_JOINT_OPEN
@@ -288,6 +289,19 @@ def eval_bc(config, ckpt_name, save_episode=False):
                 ### process previous timestep to get qpos and image_list
                 print(f"[DEBUG_Inference] Processing timestep {t} for rollout {rollout_id}")
                 obs = ts.observation
+
+                # 실시간 Onscreen 렌더링을 위한 이미지 처리
+                img_high = obs['images']['cam_high']
+                img_low = obs['images']['cam_low']
+
+                if img_low is not None:
+                    cv2.imshow("cam_low (D405)", img_low)
+                if img_high is not None:
+                    cv2.imshow("cam_high (D435)", img_high)
+
+                cv2.waitKey(1)
+                # 
+
                 if 'images' in obs:
                     image_list.append(obs['images'])
                 else:
@@ -332,6 +346,12 @@ def eval_bc(config, ckpt_name, save_episode=False):
                 action = post_process(raw_action)
                 target_qpos = action
                 print(f"[DEBUG_Inference_action] Action shape: {action.shape} for rollout {rollout_id}")
+                print(f"[DEBUG_target_qpos] rollout: {rollout_id} \t timestep: {t} \n"
+                    f"  base    = {target_qpos[0]:.4f} \t shoulder = {target_qpos[1]:.4f} \t elbow   = {target_qpos[2]:.4f} \n"
+                    f"  wrist1  = {target_qpos[3]:.4f} \t wrist2   = {target_qpos[4]:.4f} \t wrist3 = {target_qpos[5]:.4f} \n"
+                    f"  gripper = {target_qpos[6]:.4f}")
+
+
 
                 ### step the environment
                 # action을 실행하게 하는 부분

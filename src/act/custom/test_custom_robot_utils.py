@@ -13,7 +13,7 @@ import pyrealsense2 as rs
 import numpy as np
 
 # DT = 0.05 # 20Hz (수정)
-DT = 0.02 # 50Hz(ACT 원본)
+# DT = 0.02 # 50Hz(ACT 원본)
 
 
 def get_device_serials():
@@ -306,6 +306,7 @@ import time
 # from teleop_data.msg import OnRobotRGOutput
 # from custom_act.msg import OnRobotRGOutput
 from robotory_rb10_rt.msg import OnRobotRGInput, OnRobotRGOutput
+from custom.custom_constants import DT
 
 
 import sys
