@@ -22,7 +22,8 @@ from custom.custom_constants import DT, START_ARM_POSE
 # from custom_constants import PUPPET_GRIPPER_POSITION_NORMALIZE_FN, PUPPET_GRIPPER_VELOCITY_NORMALIZE_FN
 # from custom_constants import PUPPET_GRIPPER_JOINT_OPEN, PUPPET_GRIPPER_JOINT_CLOSE
 # from custom_robot_utils import Recorder, ImageRecorder
-from custom.test_custom_robot_utils import get_device_serials, Recorder, ImageRecorder, MAX_GRIP
+# from custom.test_custom_robot_utils import get_device_serials, Recorder, ImageRecorder, MAX_GRIP
+from custom.custom_robot_utils import get_device_serials, Recorder, ImageRecorder, MAX_GRIP
 
 # from custom_robot_utils import setup_master_bot, setup_puppet_bot, move_arms, move_grippers
 # from interbotix_xs_modules.recorder_arm import InterbotixManipulatorXS

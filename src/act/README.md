@@ -4,7 +4,7 @@
 - ``check_cam_serial.py``: Checking the camera serial
 - ``custom_constants.py``: Define custom Task, DT, JOINT_NAMES, START_ARM_POSE
 - ``custom_real_env.py``: Define custm_env(Recorder, ImageRecorder) and custom methods
-- ``test_custom_robot_utils.py``: Define ImageRecorder, Recorder class. Also, define observation & action methods.
+- ``custom_robot_utils.py``: Define ImageRecorder, Recorder class. Also, define observation & action methods.
 - `custom_imitate_episodes.py`: Train and Inference
 ### Data
 - ``record_hdf5_act_form.py``: Get demonstration dataset(Using Padding and Episode Length is defined)

@@ -223,7 +223,8 @@ def eval_bc(config, ckpt_name, save_episode=False):
         # from aloha_scripts.robot_utils import move_grippers # requires aloha
         # from aloha_scripts.real_env import make_real_env # requires aloha
         # from custom.test_custom_robot_utils import move_grippers, MAX_GRIP # requires aloha
-        from custom.test_custom_robot_utils import MAX_GRIP # requires aloha
+        # from custom.test_custom_robot_utils import MAX_GRIP # requires aloha
+        from custom.custom_robot_utils import MAX_GRIP # requires aloha
         from custom.custom_real_env import make_real_env # requires aloha
 
         env = make_real_env(init_node=True)
