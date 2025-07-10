@@ -10,7 +10,7 @@ import numpy as np
 today = datetime.now().strftime('%m%d') 
 
 # 파일 경로 (현재 디렉토리에 있는 경우)
-file_dir = "/home/vision/catkin_ws/src/custom_act/src/act/data/rb_transfer_can"
+file_dir = "/home/vision/catkin_ws/src/custom_act/src/act/data/rb_push_toolbox"
 file_path = f"/{today}/episode_0.hdf5"
 
 # file_dir = "/home/vision/catkin_ws/src/teleop_data/act_data/0623"

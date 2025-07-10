@@ -28,7 +28,8 @@ import os
 # FIXED_EPISODE_LEN = 500
 
 from custom_constants import TASK_CONFIGS
-task_config = TASK_CONFIGS['rb_transfer_can']
+# task_config = TASK_CONFIGS['rb_transfer_can']
+task_config = TASK_CONFIGS['rb_push_toolbox']
 FIXED_EPISODE_LEN = task_config['episode_len']
 
 def init_buffer():
@@ -50,7 +51,9 @@ def init_buffer():
 
 def save_to_hdf5(buffer, i=None):
     today = datetime.now().strftime('%m%d')
-    data_dir = f'/home/vision/catkin_ws/src/custom_act/src/act/data/rb_transfer_can/{today}'
+    # data_dir = f'/home/vision/catkin_ws/src/custom_act/src/act/data/rb_transfer_can/{today}'
+    data_dir = f'/home/vision/catkin_ws/src/custom_act/src/act/data/rb_push_toolbox/{today}'
+
     if not os.path.isdir(data_dir):
         os.makedirs(data_dir)
 
