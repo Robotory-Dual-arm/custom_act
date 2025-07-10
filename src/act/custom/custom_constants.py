@@ -27,7 +27,10 @@ TASK_CONFIGS = {
     'rb_push_toolbox':{
         'dataset_dir': DATA_DIR + '/rb_push_toolbox',
         'num_episodes': 100,
-        'episode_len': 350,
+        # 'episode_len': 350,
+
+        # Inference 시에는 episode len 길게
+        'episode_len': 5000,
         'camera_names': ['cam_high', 'cam_low']
     },
 }
