@@ -47,10 +47,11 @@ JOINT_NAMES = ["base", "shoulder", "elbow", "wrist1", "wrist2", "wrist3"]
 
 # rb_transfer_can_start_pose
 # [60 -26 -100 37 275 53 1]
+# START_ARM_POSE = [1.0472, -0.4537856, -1.72876, 0.645772, 4.799655, 0.925, 0] # 초기 위치 정해서 rad으로 입력 필요
 
 # push tool box_start_pose
 # [80 -15 -98 22 270 -75 1]
-START_ARM_POSE = [1.0472, -0.4537856, -1.72876, 0.645772, 4.799655, 0.925, 0] # 초기 위치 정해서 rad으로 입력 필요
+START_ARM_POSE = [1.39626, -0.2618, -1.71042, 0.38397, 4.71239, -1.309, 0] # 초기 위치 정해서 rad으로 입력 필요
 
 # START_ARM_POSE = [base", "shoulder", "elbow", "wrist1", "wrist2", "wrist3, "gripper"]
 

@@ -209,6 +209,8 @@ def eval_bc(config, ckpt_name, save_episode=True):
         # task 추가
         elif 'rb_transfer_can' in task_name:
             pass
+        elif 'rb_push_toolbox' in task_name:
+            pass
 
         ts = env.reset()
 

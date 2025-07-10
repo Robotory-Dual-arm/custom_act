@@ -257,7 +257,9 @@ def eval_bc(config, ckpt_name, save_episode=False):
         # task 추가
         elif 'rb_transfer_can' in task_name:
             pass
-        
+        elif 'rb_push_toolbox' in task_name:
+            pass
+
         print(f"[DEBUG_reset] Resetting environment for rollout {rollout_id}")
         ts = env.reset()
         print(f"[DEBUG_reset] obs_image.shape: {ts.observation['images']['cam_high'].shape}, {ts.observation['images']['cam_low'].shape} for rollout {rollout_id}")
