@@ -7,10 +7,11 @@
 # DATA_DIR = '<put your data dir here>'
 
 # 개인 PC
-DATA_DIR = '/home/chem/vision_custom_act/src/act/data'
+
+# DATA_DIR= '/home/chem/vision_custom_act/src/act/data'
 
 # vision PC
-# DATA_DIR = '/home/vision/catkin_ws/src/custom_act/src/act/data'
+DATA_DIR = '/home/vision/catkin_ws/src/custom_act/src/act/data'
 TASK_CONFIGS = {
     # 'aloha_wear_shoe':{
     #     'dataset_dir': DATA_DIR + '/aloha_wear_shoe',
