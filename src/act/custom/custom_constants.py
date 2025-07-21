@@ -27,17 +27,17 @@ TASK_CONFIGS = {
     },
     'rb_push_toolbox':{
         'dataset_dir': DATA_DIR + '/rb_push_toolbox',
-        'num_episodes': 100,
-        # 'episode_len': 350,
+        'num_episodes': 50,
+        'episode_len': 350,
 
         # Inference 시에는 episode len 길게
-        'episode_len': 5000,
+        # 'episode_len': 5000,
         'camera_names': ['cam_high', 'cam_low']
     },
 }
 
 ### ALOHA fixed constants
-DT = 0.02 # 50Hz(ACT 원본)
+DT = 0.05 # 50Hz(ACT 원본)
 # DT = 0.05 # 20Hz (수정)
 
 # 원본
@@ -54,8 +54,14 @@ JOINT_NAMES = ["base", "shoulder", "elbow", "wrist1", "wrist2", "wrist3"]
 # START_ARM_POSE = [1.0472, -0.4537856, -1.72876, 0.645772, 4.799655, 0.925, 0] # 초기 위치 정해서 rad으로 입력 필요
 
 # push tool box_start_pose
-# [80 -15 -98 22 270 -75 1]
-START_ARM_POSE = [1.39626, -0.2618, -1.71042, 0.38397, 4.71239, -1.309, 0] # 초기 위치 정해서 rad으로 입력 필요
+import math
+base = 86.19*math.pi/180  # 81.6 degree to radian
+shoulder = -6.6*math.pi/180  # -3.48 degree to radian
+elbow = -117.63*math.pi/180  # -123.4 degree to radian
+wrist1 = 34.23*math.pi/180  # 51.43 degree to radian
+wrist2 = 270.00*math.pi/180  # 269.10 degree to radian
+wrist3 = -88.96*math.pi/180  # -87.22 degree to radian
+START_ARM_POSE = [base, shoulder, elbow, wrist1, wrist2, wrist3, 0] # 초기 위치 정해서 rad으로 입력 필요
 
 # START_ARM_POSE = [base", "shoulder", "elbow", "wrist1", "wrist2", "wrist3, "gripper"]
 
