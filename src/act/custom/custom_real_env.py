@@ -1,9 +1,5 @@
-# 1. self.follower_bot 정의 <- rb, gripper와 연결하는 클래스로 test_custom_robot_utils.py에서 정의 (완)
-# 2. Dual Arm -> Single Arm으로 변경 (완)
-# 3. 제어 명령어들 수정 (완)
-# 4. 사용하지 않는 observation들 처리 (완)
-# 5. RB10, 그리퍼 Data Subscribe <- @test_custom_robot_utils.py에서 정의 (완)
-# 6. RB10, 그리퍼에 Action Publish <- step 메소드에서 실행
+# Author: Chemin Ahn (chemx3937@gmail.com)
+# Use of this source code is governed by the MIT, see LICENSE
 
 
 import time
@@ -12,26 +8,9 @@ import collections
 import matplotlib.pyplot as plt
 import dm_env
 
-# from custom_constants import DT, START_ARM_POSE
-
-
-
-
 from custom.custom_constants import DT, START_ARM_POSE
-# from custom_constants import DT, START_ARM_POSE, MASTER_GRIPPER_JOINT_NORMALIZE_FN, PUPPET_GRIPPER_JOINT_UNNORMALIZE_FN
-# from custom_constants import PUPPET_GRIPPER_POSITION_NORMALIZE_FN, PUPPET_GRIPPER_VELOCITY_NORMALIZE_FN
-# from custom_constants import PUPPET_GRIPPER_JOINT_OPEN, PUPPET_GRIPPER_JOINT_CLOSE
-# from custom_robot_utils import Recorder, ImageRecorder
-# from custom.test_custom_robot_utils import get_device_serials, Recorder, ImageRecorder, MAX_GRIP
 from custom.custom_robot_utils import get_device_serials, Recorder, ImageRecorder, MAX_GRIP
 
-# from custom_robot_utils import setup_master_bot, setup_puppet_bot, move_arms, move_grippers
-# from interbotix_xs_modules.recorder_arm import InterbotixManipulatorXS
-# from interbotix_xs_msgs.msg import JointSingleCommand
-
-# START_ARM_POSE = [1.570796, 0, -1.570796, 0, 4.712388, 0, 1] # 초기 위치 정해서 rad으로 입력 필요
-# DT = 0.05 # 20Hz (수정)
-# DT = 0.02 # 50Hz(ACT 원본)
 
 
 import IPython
@@ -52,43 +31,13 @@ class RealEnv:
 
     # def __init__(self, init_node, setup_robots=True):
     def __init__(self, init_node = True):
-        # self.follower_bot = InterbotixManipulatorXS(robot_model="vx300s", group_name="recorder_arm", gripper_name="gripper",
-        #                                                robot_name=f'puppet_left', init_node=init_node)
-
-        # self,recorder_arm 부분에서 Recoder 클래스로 rb, 그리퍼 연결하므로 필요 X
-        # if setup_robots:
-        #     self.setup_robots()
-
-        # RB,Gripper의 state, 제어 명령을 내릴수 있게 연결시키는 Recorder 클래스 객체 생성
-        # self.recorder_arm = Recorder(init_node=False)
         self.recorder_arm = Recorder(init_node=init_node)
-
-        # self.recorder_arm = Recorder('left', init_node=False)
-        # self.recorder_right = Recorder('right', init_node=False)
-        # realsense 연결시키는 ImageRecorder 클래스 객체 생성
-        # self.image_recorder = ImageRecorder(init_node=False)
-
-
         serials = get_device_serials()
         serial_d405 = serials[0]
         serial_d435 = serials[1]        
         self.image_recorder = ImageRecorder(serial_d405, serial_d435)
         time.sleep(1.0)  # wait for cameras to start
 
-        # JointSingleCommand는 interbotix_xs_msgs.msg로 aloha에서만 사능한 명령어이므로 사용 X
-        # self.gripper_command = JointSingleCommand(name="gripper") 
-
-    # def setup_robots(self):
-    #     setup_puppet_bot(self.follower_bot)
-
-    # 원본
-    # def get_qpos(self):
-    #     qpos_raw = self.recorder_arm.qpos
-    #     follower_arm_qpos = qpos_raw[:6]
-    #     follower_gripper_qpos = [PUPPET_GRIPPER_POSITION_NORMALIZE_FN(qpos_raw[7])] # this is position not joint
-    #     return np.concatenate([follower_arm_qpos, follower_gripper_qpos])
-
-    # 수정 <- custom_robot_utils.py에 있는 get_qpos 사용하도록 변경
     def get_qpos(self):
         return self.recorder_arm.get_qpos()
 
@@ -106,21 +55,11 @@ class RealEnv:
     def get_images(self):
         return self.image_recorder.get_images()
 
-    # 원본
-    # def set_gripper_pose(self, desired_pos_normalized):
-    #     gripper_desired_joint = PUPPET_GRIPPER_JOINT_UNNORMALIZE_FN(desired_pos_normalized)
-    #     self.gripper_command.cmd = gripper_desired_joint
-    #     self.follower_bot.gripper.core.pub_single.publish(self.gripper_command)
-
-    # 수정 <- robot_utils.py에서 정의
-
-    # custom_constatns에서 정의한 START_ARM_POSE로 움직이게 함
     def _reset_joints(self):
         reset_position = START_ARM_POSE[:6]
         self.recorder_arm.move_arm(reset_position, move_time=1.0)
         # move_arms([self.follower_bot], [reset_position], move_time=1)
 
-    # 그리퍼가 완전히 열리게 함
     def _reset_gripper(self):
         """
         1. 절반 닫기 (폭 550)
@@ -131,12 +70,6 @@ class RealEnv:
 
         self.recorder_arm.move_gripper(half_closed, move_time=0.5)
         self.recorder_arm.move_gripper(fully_open, move_time=1.0)
-
-
-    # def _reset_gripper(self):
-    #     """Set to position mode and do position resets: first open then close. Then change back to PWM mode"""
-    #     move_grippers([self.follower_bot], [PUPPET_GRIPPER_JOINT_OPEN] * 2, move_time=0.5)
-    #     move_grippers([self.follower_bot], [PUPPET_GRIPPER_JOINT_CLOSE] * 2, move_time=1)
 
     def get_observation(self):
         obs = collections.OrderedDict()
@@ -161,22 +94,11 @@ class RealEnv:
             discount=None,
             observation=self.get_observation())
 
-    # custom_robot_utils.py에서 새로 정의한 
     # step별 action을 실행시키는 부분으로 로봇 움직이게 함
     def step(self, action):
-        # state_len = int(len(action) / 2)
-        # follower_action = action[:state_len]
-        # # left_action = action[:state_len]
-        # # right_action = action[state_len:]
-
         follower_action = action
-
-        # rb, 그리퍼에 action 적용시켜서 움직이게 하는 부분
-        # self.follower_bot.recorder_arm.set_joint_positions(left_action[:6], blocking=False)
-        # self.follower_bot.recorder_arm.set_joint_positions(follower_action[:6], blocking=False)
         self.recorder_arm.set_joint_positions(follower_action[:6])
         self.recorder_arm.set_gripper_pose(follower_action[-1])
-        # self.set_gripper_pose(left_action[-1], right_action[-1])
         time.sleep(DT)
         return dm_env.TimeStep(
             step_type=dm_env.StepType.MID,
@@ -195,11 +117,6 @@ def get_action(Leader_bot):
     # action[7+6] = MASTER_GRIPPER_JOINT_NORMALIZE_FN(master_bot_right.dxl.joint_states.position[6])
 
     return action
-
-
-# def make_real_env(init_node, setup_robots=True):
-#     env = RealEnv(init_node, setup_robots)
-#     return env
 
 def make_real_env(init_node):
     env = RealEnv(init_node)

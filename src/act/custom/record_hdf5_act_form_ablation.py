@@ -46,64 +46,131 @@ def init_buffer():
         'action': []
     }
 
+def center_crop_resize(img, size=120):
+    h, w = img.shape[:2]
+    start_x = (w - size) // 2
+    start_y = (h - size) // 2
+    cropped = img[start_y:start_y+size, start_x:start_x+size]
+    return cropped
 
-def save_to_hdf5(buffer, i=None):
+def save_dual_hdf5(buffer, i=None):
     today = datetime.now().strftime('%m%d')
-    # data_dir = f'/home/vision/catkin_ws/src/custom_act/src/act/data/rb_transfer_can/{today}'
-    data_dir = f'/home/vision/catkin_ws/src/custom_act/src/act/data/rb_push_toolbox/{today}'
+    base_dir = '/home/vision/catkin_ws/src/custom_act/src/act/data/rb_push_toolbox'
+    origin_dir = os.path.join(base_dir, today, "origin")
+    crop_dir = os.path.join(base_dir, today, "crop")
 
-    if not os.path.isdir(data_dir):
-        os.makedirs(data_dir)
+    os.makedirs(origin_dir, exist_ok=True)
+    os.makedirs(crop_dir, exist_ok=True)
 
     if i is None:
-        # 자동 인덱스 결정: 같은 날짜의 기존 파일 개수 세기
-        existing = [f for f in os.listdir(data_dir) if f.startswith(f'episode_') and f.endswith('.hdf5')]
+        existing = [f for f in os.listdir(origin_dir) if f.endswith('.hdf5')]
         i = len(existing)
 
-    filename = f'episode_{i}.hdf5'
-    save_path = os.path.join(data_dir, filename)
+    version_map = {
+        "origin": {
+            "dir": origin_dir,
+            "shape": (480, 640)
+        },
+        "crop": {
+            "dir": crop_dir,
+            "shape": (120, 120)
+        }
+    }
 
-    with h5py.File(save_path, 'w') as f:
-        f.attrs['sim'] = False
-        obs = f.create_group('observations')
-        imgs = obs.create_group('images')
+    for version, config in version_map.items():
+        save_path = os.path.join(config["dir"], f'episode_{i}.hdf5')
+        h, w = config["shape"]
 
-        # N = len(buffer['action'])
-
-        # # Create image datasets
-        # for cam in buffer['observations']['images']:
-        #     imgs.create_dataset(cam, data=np.array(buffer['observations']['images'][cam], dtype=np.uint8))
-
-        # # qpos, qvel, action
-        # obs.create_dataset('qpos', data=np.array(buffer['observations']['qpos'], dtype=np.float64))
-        # obs.create_dataset('qvel', data=np.array(buffer['observations']['qvel'], dtype=np.float64))
-        # f.create_dataset('action', data=np.array(buffer['action'], dtype=np.float64))
-
-        # print(f"[HDF5] Saved {N} timesteps to {save_path}")
-        # return i
-
-        # padding 추가 버전
-                # 고정된 길이로 초기화 (패딩 포함)
-        for cam in buffer['observations']['images']:
-            imgs.create_dataset(cam, (FIXED_EPISODE_LEN, 480, 640, 3), dtype='uint8')
-        obs.create_dataset('qpos', (FIXED_EPISODE_LEN, 7), dtype='float64')
-        obs.create_dataset('qvel', (FIXED_EPISODE_LEN, 7), dtype='float64')
-        f.create_dataset('action', (FIXED_EPISODE_LEN, 7), dtype='float64')
-        f.create_dataset('is_pad', (FIXED_EPISODE_LEN,), dtype='bool')
-
-        real_len = len(buffer['action'])
-        for t in range(FIXED_EPISODE_LEN):
-            is_padding = t >= real_len
-            idx = min(t, real_len - 1)  # 마지막 상태를 복사
+        with h5py.File(save_path, 'w') as f:
+            f.attrs['sim'] = False
+            obs = f.create_group('observations')
+            imgs = obs.create_group('images')
             for cam in buffer['observations']['images']:
-                imgs[cam][t] = buffer['observations']['images'][cam][idx]
-            obs['qpos'][t] = buffer['observations']['qpos'][idx]
-            obs['qvel'][t] = buffer['observations']['qvel'][idx]
-            f['action'][t] = buffer['action'][idx]
-            f['is_pad'][t] = is_padding
+                imgs.create_dataset(cam, (FIXED_EPISODE_LEN, h, w, 3), dtype='uint8')
+            obs.create_dataset('qpos', (FIXED_EPISODE_LEN, 7), dtype='float64')
+            obs.create_dataset('qvel', (FIXED_EPISODE_LEN, 7), dtype='float64')
+            f.create_dataset('action', (FIXED_EPISODE_LEN, 7), dtype='float64')
+            f.create_dataset('is_pad', (FIXED_EPISODE_LEN,), dtype='bool')
 
-        print(f"[HDF5] Saved {real_len} steps with padding to {save_path}")
-        return i
+            real_len = len(buffer['action'])
+            for t in range(FIXED_EPISODE_LEN):
+                idx = min(t, real_len - 1)
+                for cam in buffer['observations']['images']:
+                    img = buffer['observations']['images'][cam][idx]
+                    if version == "crop":
+                        img = center_crop_resize(img, size=120)
+                    imgs[cam][t] = img
+                obs['qpos'][t] = buffer['observations']['qpos'][idx]
+                obs['qvel'][t] = buffer['observations']['qvel'][idx]
+                f['action'][t] = buffer['action'][idx]
+                f['is_pad'][t] = t >= real_len
+
+        print(f"[HDF5:{version}] Saved {real_len} steps with padding to {save_path}")
+
+    return i
+
+
+# def save_to_hdf5(buffer, i=None):
+#     today = datetime.now().strftime('%m%d')
+#     # data_dir = f'/home/vision/catkin_ws/src/custom_act/src/act/data/rb_transfer_can/{today}'
+#     data_dir = f'/home/vision/catkin_ws/src/custom_act/src/act/data/rb_push_toolbox/{today}'
+#     origin_dir = os.path.join(data_dir, today, "origin")
+#     crop_dir = os.path.join(data_dir, today, "crop")
+
+#     if not os.path.isdir(data_dir):
+#         # os.makedirs(data_dir)
+#         os.makedirs(origin_dir)
+#         os.makedirs(crop_dir)
+
+#     if i is None:
+#         # 자동 인덱스 결정: 같은 날짜의 기존 파일 개수 세기
+#         existing = [f for f in os.listdir(data_dir) if f.startswith(f'episode_') and f.endswith('.hdf5')]
+#         i = len(existing)
+
+#     filename = f'episode_{i}.hdf5'
+#     save_path = os.path.join(data_dir, filename)
+
+#     with h5py.File(save_path, 'w') as f:
+#         f.attrs['sim'] = False
+#         obs = f.create_group('observations')
+#         imgs = obs.create_group('images')
+
+#         # N = len(buffer['action'])
+
+#         # # Create image datasets
+#         # for cam in buffer['observations']['images']:
+#         #     imgs.create_dataset(cam, data=np.array(buffer['observations']['images'][cam], dtype=np.uint8))
+
+#         # # qpos, qvel, action
+#         # obs.create_dataset('qpos', data=np.array(buffer['observations']['qpos'], dtype=np.float64))
+#         # obs.create_dataset('qvel', data=np.array(buffer['observations']['qvel'], dtype=np.float64))
+#         # f.create_dataset('action', data=np.array(buffer['action'], dtype=np.float64))
+
+#         # print(f"[HDF5] Saved {N} timesteps to {save_path}")
+#         # return i
+
+#         # padding 추가 버전
+#                 # 고정된 길이로 초기화 (패딩 포함)
+#         for cam in buffer['observations']['images']:
+#             imgs.create_dataset(cam, (FIXED_EPISODE_LEN, 480, 640, 3), dtype='uint8')
+#         obs.create_dataset('qpos', (FIXED_EPISODE_LEN, 7), dtype='float64')
+#         obs.create_dataset('qvel', (FIXED_EPISODE_LEN, 7), dtype='float64')
+#         f.create_dataset('action', (FIXED_EPISODE_LEN, 7), dtype='float64')
+#         f.create_dataset('is_pad', (FIXED_EPISODE_LEN,), dtype='bool')
+
+#         real_len = len(buffer['action'])
+#         for t in range(FIXED_EPISODE_LEN):
+#             is_padding = t >= real_len
+#             idx = min(t, real_len - 1)  # 마지막 상태를 복사
+#             for cam in buffer['observations']['images']:
+#                 imgs[cam][t] = buffer['observations']['images'][cam][idx]
+#             obs['qpos'][t] = buffer['observations']['qpos'][idx]
+#             obs['qvel'][t] = buffer['observations']['qvel'][idx]
+#             f['action'][t] = buffer['action'][idx]
+#             f['is_pad'][t] = is_padding
+
+#         print(f"[HDF5] Saved {real_len} steps with padding to {save_path}")
+#         return i
 
 def gripper_callback(msg):
     global latest_gripper_qpos
@@ -296,8 +363,9 @@ def main():
             while True:
                 data_store = input("Store demo data? (y/n): ").strip().lower()
                 if data_store.strip() == 'y':
-                    saved_i = save_to_hdf5(buffer)
-                    print(f"'demo_{saved_i}' Data stored.")
+                    saved_i = save_dual_hdf5(buffer)
+                    print(f"✅ Stored both versions as 'episode_{saved_i}.hdf5' in crop/ and origin/")
+                    # print(f"'demo_{saved_i}' Data stored.")
                     break
                 elif data_store.strip() == 'n':
                     print("Data discarded.")

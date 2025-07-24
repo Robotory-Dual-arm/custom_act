@@ -1,3 +1,6 @@
+# Author: Chemin Ahn (chemx3937@gmail.com)
+# Use of this source code is governed by the MIT, see LICENSE
+
 import h5py
 
 def show_hdf5_structure(file_path):

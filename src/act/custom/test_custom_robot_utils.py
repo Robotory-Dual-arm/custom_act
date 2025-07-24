@@ -1,5 +1,8 @@
 #!/home/vision/anaconda3/envs/aloha/bin/python
 
+# Author: Chemin Ahn (chemx3937@gmail.com)
+# Use of this source code is governed by the MIT, see LICENSE
+
 #  send_joint_command()와 send_gripper_command() 함수 구현 (실제 API 또는 통신 방식) <- 완
 #  초기화 및 리셋 함수 (move_arms, move_grippers)도 환경에 맞게 구성 <- 완
 #  inference에서 get_qpos() → policy → set_joint_positions, set_gripper_pose()로 연결되는 흐름 구성 <- 완

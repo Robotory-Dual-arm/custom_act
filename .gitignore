@@ -4,6 +4,10 @@ include/
 # Checkpoint and training data folders
 src/act/checkpoint/
 src/act/data/
+src/act/custom/teleop
+
+# Test Code
+src/act/custom/test_custom_robot_utils.py
 
 # 파이썬 캐시 및 임시파일
 __pycache__/

@@ -1,10 +1,7 @@
 #!/usr/bin/env python3
 
-# 수정 List:
-# 1. action에서 Leader, 그리퍼의 pos 받게 하기 <- Joint Copy 방법 설치되면 하기
-# 2. Image shape: 480,640,3 <- 완료
-# 3. 초기위치 설정 필요 <- 해보고 성능 안좋으면 추가하기
-# 4. 조기 종료시 padding 되게 추가(act는 actiond sequence를 출력하므로 모든 episode의 demonstration 길이가 같아야함)
+# Author: Chemin Ahn (chemx3937@gmail.com)
+# Use of this source code is governed by the MIT, see LICENSE
 
 import sys
 sys.path.append('/home/vision/catkin_ws/src/robotory_rb10_rt/scripts')

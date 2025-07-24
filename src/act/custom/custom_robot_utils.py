@@ -1,8 +1,7 @@
 #!/home/vision/anaconda3/envs/aloha/bin/python
 
-#  send_joint_command()와 send_gripper_command() 함수 구현 (실제 API 또는 통신 방식) <- 완
-#  초기화 및 리셋 함수 (move_arms, move_grippers)도 환경에 맞게 구성 <- 완
-#  inference에서 get_qpos() → policy → set_joint_positions, set_gripper_pose()로 연결되는 흐름 구성 <- 완
+# Author: Chemin Ahn (chemx3937@gmail.com)
+# Use of this source code is governed by the MIT, see LICENSE
 
 # get_images()로 비동기 방식으로 계속 camera data 갖고옴
 
@@ -251,7 +250,6 @@ class Recorder:
         else:
             print("No gripper diagnostics available.")
 
-    # 추가해야 되는 것
     # reset 시킬때만 Joint 움직이게 하는 메소드
     def move_arm(self, target_pose, move_time=1.0, delta_theta_max=np.deg2rad(3.5)):
         # from custom_constants import DT

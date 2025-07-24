@@ -1,10 +1,11 @@
-# 수정해줘야 할 부분
-# 1. START_ARM_POSE <- 초기 위치 정해서 rad으로 입력 필요
-# 2. Helper functions <- 사용 X
-
 ### Task parameters
 
-# DATA_DIR = '<put your data dir here>'
+# Author: Chemin Ahn (chemx3937@gmail.com)
+# Use of this source code is governed by the MIT, see LICENSE
+
+# Data 취득 및 Train시 episode_len을 짧게 설정
+# Imference 시 episode_len을 길게 설정
+
 
 # 개인 PC
 
@@ -28,17 +29,18 @@ TASK_CONFIGS = {
     'rb_push_toolbox':{
         'dataset_dir': DATA_DIR + '/rb_push_toolbox',
         'num_episodes': 50,
-        'episode_len': 350,
+        # Data 취득 및 Train 시에는 episode len 길게
+        # 'episode_len': 350,
 
         # Inference 시에는 episode len 길게
-        # 'episode_len': 5000,
+        'episode_len': 5000,
         'camera_names': ['cam_high', 'cam_low']
     },
 }
 
 ### ALOHA fixed constants
-DT = 0.05 # 50Hz(ACT 원본)
-# DT = 0.05 # 20Hz (수정)
+# DT = 0.02 # 50Hz(ACT 원본)
+DT = 0.05 # 20Hz (수정)
 
 # 원본
 # JOINT_NAMES = ["waist", "shoulder", "elbow", "forearm_roll", "wrist_angle", "wrist_rotate"]

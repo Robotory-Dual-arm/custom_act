@@ -1,3 +1,6 @@
+# Author: Chemin Ahn (chemx3937@gmail.com)
+# Use of this source code is governed by the MIT, see LICENSE
+
 # Camera serial 확인용
 
 import pyrealsense2 as rs

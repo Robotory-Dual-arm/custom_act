@@ -32,6 +32,8 @@
 
     rosrun robotory_rb10_rt servo_vr.py
 ### Record data
+1. Check the Task and episode_len at ``custom_constants.py``
+
 
     conda activate aloha
     rosrun custom_act record_hdf5_act_form.py
@@ -49,6 +51,9 @@
     ```
 
 ## Inference
+### TODO
+1. Check the episode_len at ``custom_constants.py``
+
 ### Gripper
     PICO
     roslaunch onrobot_rg_control bringup.launch gripper:=rg2 ip:=192.168.1.1

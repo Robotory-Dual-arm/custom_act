@@ -1,5 +1,8 @@
 import h5py
 
+# Author: Chemin Ahn (chemx3937@gmail.com)
+# Use of this source code is governed by the MIT, see LICENSE
+
 # 파일 열기
 with h5py.File('/home/chem/act/data/rb_transfer_can/episode_3.hdf5', 'r') as f:
     # 전체 구조 출력
