@@ -1,5 +1,8 @@
 #!/home/vision/anaconda3/envs/aloha/bin/python
 
+# Author: Chemin Ahn (chemx3937@gmail.com)
+# Use of this source code is governed by the MIT, see LICENSE
+
 import torch
 import numpy as np
 import os
