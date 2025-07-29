@@ -34,11 +34,15 @@ import threading
 import time
 
 class ImageRecorder:
+    # camera 추가 시 해줄 부분
     def __init__(self, serial_d405, serial_d435):
         print(f"[INFO] serial_d405 = {serial_d405}, serial_d435 = {serial_d435}")
 
         self.cam_high_frame = None
         self.cam_low_frame = None
+        # self.cam_wristl_frame = None
+        # self.cam_wristr_frame = None
+
         self.running = True
 
         # D405
@@ -81,7 +85,6 @@ class ImageRecorder:
                 print(f"[WARN] Skipping unstable frame: {e}")
             time.sleep(0.05)
         print("[INFO] Camera warm-up done.")
-
         # Start background thread
         self.thread = threading.Thread(target=self._update_frames, daemon=True)
         self.thread.start()

@@ -54,6 +54,7 @@ def main(args):
     camera_names = task_config['camera_names']
 
     # fixed parameters
+    # Robot State 확장시 추가해줄 부분
     # state_dim = 14  # ACT 원본: (Joint 6 + Gripper 1) x 2
     state_dim = 7  # Custom: (Joint 6 + Gripper 1)
 
@@ -146,23 +147,6 @@ def make_optimizer(policy_class, policy):
         raise NotImplementedError
     return optimizer
 
-
-# def get_image(ts, camera_names):
-#     curr_images = []
-#     for cam_name in camera_names:
-
-#         # 디버깅 용 추가
-#         img = ts.observation['images'].get(cam_name, None)
-#         if img is None:
-#             print(f"[SKIP] Camera '{cam_name}' returned None.")
-#             return None  # 이미지 못 받았으면 None 리턴
-#         # 디버깅 용 추가 끝
-
-#         curr_image = rearrange(ts.observation['images'][cam_name], 'h w c -> c h w')
-#         curr_images.append(curr_image)
-#     curr_image = np.stack(curr_images, axis=0)
-#     curr_image = torch.from_numpy(curr_image / 255.0).float().cuda().unsqueeze(0)
-#     return curr_image
 
 def get_image(ts, camera_names, retries=5, wait_sec=0.2):
     for attempt in range(retries):
@@ -258,6 +242,7 @@ def eval_bc(config, ckpt_name, save_episode=False):
             BOX_POSE[0] = np.concatenate(sample_insertion_pose()) # used in sim reset
         
         # task 추가
+        # TASK 추가 정의시 추가
         elif 'rb_transfer_can' in task_name:
             pass
         elif 'rb_push_toolbox' in task_name:
@@ -265,8 +250,8 @@ def eval_bc(config, ckpt_name, save_episode=False):
 
         print(f"[DEBUG_reset] Resetting environment for rollout {rollout_id}")
         ts = env.reset()
-        print(f"[DEBUG_reset] obs_image.shape: {ts.observation['images']['cam_high'].shape}, {ts.observation['images']['cam_low'].shape} for rollout {rollout_id}")
-        print(f"[DEBUG_reset] Environment reset complete for rollout {rollout_id}")
+        # print(f"[DEBUG_reset] obs_image.shape: {ts.observation['images']['cam_high'].shape}, {ts.observation['images']['cam_low'].shape} for rollout {rollout_id}")
+        # print(f"[DEBUG_reset] Environment reset complete for rollout {rollout_id}")
 
         ### onscreen render <- 사용 X
         # if onscreen_render:
@@ -293,17 +278,25 @@ def eval_bc(config, ckpt_name, save_episode=False):
                 #     plt.pause(DT)
 
                 ### process previous timestep to get qpos and image_list
-                print(f"[DEBUG_Inference] Processing timestep {t} for rollout {rollout_id}")
+                # print(f"[DEBUG_Inference] Processing timestep {t} for rollout {rollout_id}")
                 obs = ts.observation
 
                 # 실시간 Onscreen 렌더링을 위한 이미지 처리
+                # camera 추가 시 해줄 부분
                 img_high = obs['images']['cam_high']
                 img_low = obs['images']['cam_low']
+                # img_wristL = obs['images']['cam_wristl']
+                # img_wristR = obs['images']['cam_wristr']
+
 
                 if img_low is not None:
                     cv2.imshow("cam_low (D405)", img_low)
                 if img_high is not None:
                     cv2.imshow("cam_high (D435)", img_high)
+                # if img_wristL is not None:
+                #     cv2.imshow("cam_wristl ()", img_wristL)
+                # if img_wristR is not None:
+                #     cv2.imshow("cam_wristr ()", img_wristR)
 
                 cv2.waitKey(1)
                 # 
@@ -316,7 +309,7 @@ def eval_bc(config, ckpt_name, save_episode=False):
                 qpos = pre_process(qpos_numpy)
                 qpos = torch.from_numpy(qpos).float().cuda().unsqueeze(0)
                 qpos_history[:, t] = qpos
-                print(f"[DEBUG_Inference_image] Processed timestep {t} for rollout {rollout_id}")
+                # print(f"[DEBUG_Inference_image] Processed timestep {t} for rollout {rollout_id}")
                 curr_image = get_image(ts, camera_names)
                 # 디버깅 용 추가
                 if curr_image is None:
@@ -351,7 +344,7 @@ def eval_bc(config, ckpt_name, save_episode=False):
                 raw_action = raw_action.squeeze(0).cpu().numpy()
                 action = post_process(raw_action)
                 target_qpos = action
-                print(f"[DEBUG_Inference_action] Action shape: {action.shape} for rollout {rollout_id}")
+                # print(f"[DEBUG_Inference_action] Action shape: {action.shape} for rollout {rollout_id}")
                 print(f"[DEBUG_target_qpos] rollout: {rollout_id} \t timestep: {t} \n"
                     f"  base    = {target_qpos[0]:.4f} \t shoulder = {target_qpos[1]:.4f} \t elbow   = {target_qpos[2]:.4f} \n"
                     f"  wrist1  = {target_qpos[3]:.4f} \t wrist2   = {target_qpos[4]:.4f} \t wrist3 = {target_qpos[5]:.4f} \n"
@@ -362,7 +355,7 @@ def eval_bc(config, ckpt_name, save_episode=False):
                 ### step the environment
                 # action을 실행하게 하는 부분
                 ts = env.step(target_qpos)
-                print(f"[DEBUG_action] Action taken for timestep {t} in rollout {rollout_id} \n")
+                # print(f"[DEBUG_action] Action taken for timestep {t} in rollout {rollout_id} \n")
 
                 ### for visualization
                 qpos_list.append(qpos_numpy)

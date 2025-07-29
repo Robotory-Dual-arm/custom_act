@@ -5,9 +5,15 @@ include/
 src/act/checkpoint/
 src/act/data/
 src/act/custom/teleop
+src/act/aloha_scripts
+src/act/assets
 
 # Test Code
 src/act/custom/test_custom_robot_utils.py
+src/act/custom/record_hdf5_act_form_NoPadding.py
+src/act/custom/record_hdf5_act_form_ablation.py
+src/act/custom/read_hdf5.py
+src/act/custom/read_hdf5_shape.py
 
 # 파이썬 캐시 및 임시파일
 __pycache__/

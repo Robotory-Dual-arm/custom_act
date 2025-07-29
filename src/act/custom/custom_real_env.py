@@ -34,7 +34,13 @@ class RealEnv:
         self.recorder_arm = Recorder(init_node=init_node)
         serials = get_device_serials()
         serial_d405 = serials[0]
-        serial_d435 = serials[1]        
+        serial_d435 = serials[1]
+
+        # camera 추가 시 해줄 부분
+        # serial_d435 = serials[2]
+        # serial_d435 = serials[3]
+
+        # camera 추가 시 해줄 부분
         self.image_recorder = ImageRecorder(serial_d405, serial_d435)
         time.sleep(1.0)  # wait for cameras to start
 
@@ -61,16 +67,14 @@ class RealEnv:
         # move_arms([self.follower_bot], [reset_position], move_time=1)
 
     def _reset_gripper(self):
-        """
-        1. 절반 닫기 (폭 550)
-        2. 완전히 열기 (폭 1100)
-        """
+
         half_closed = MAX_GRIP/2
         fully_open = MAX_GRIP
 
         self.recorder_arm.move_gripper(half_closed, move_time=0.5)
         self.recorder_arm.move_gripper(fully_open, move_time=1.0)
 
+    # qvel, qeffort 추가시 해줄 부분
     def get_observation(self):
         obs = collections.OrderedDict()
         obs['qpos'] = self.get_qpos()
@@ -107,16 +111,16 @@ class RealEnv:
             observation=self.get_observation())
 
 # custom에서 사용 X
-def get_action(Leader_bot):
-    action = np.zeros(14) # 6 joint + 1 gripper, for two recorder_arms
-    # recorder_arm actions
-    action[:6] = Leader_bot.dxl.joint_states.position[:6]
-    # action[7:7+6] = master_bot_right.dxl.joint_states.position[:6]
-    # Gripper actions
-    action[6] = MASTER_GRIPPER_JOINT_NORMALIZE_FN(Leader_bot.dxl.joint_states.position[6])
-    # action[7+6] = MASTER_GRIPPER_JOINT_NORMALIZE_FN(master_bot_right.dxl.joint_states.position[6])
+# def get_action(Leader_bot):
+#     action = np.zeros(14) # 6 joint + 1 gripper, for two recorder_arms
+#     # recorder_arm actions
+#     action[:6] = Leader_bot.dxl.joint_states.position[:6]
+#     # action[7:7+6] = master_bot_right.dxl.joint_states.position[:6]
+#     # Gripper actions
+#     action[6] = MASTER_GRIPPER_JOINT_NORMALIZE_FN(Leader_bot.dxl.joint_states.position[6])
+#     # action[7+6] = MASTER_GRIPPER_JOINT_NORMALIZE_FN(master_bot_right.dxl.joint_states.position[6])
 
-    return action
+#     return action
 
 def make_real_env(init_node):
     env = RealEnv(init_node)
