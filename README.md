@@ -1,10 +1,5 @@
 # custom_act
 
-RB10 Manipulator + D405/D435 + RG2 Gripper 기반의 Imitation Learning 패키지입니다.  
-Demonstration 수집부터 학습, 실환경 추론까지 end-to-end로 수행할 수 있도록 구성되어 있습니다.
-
----
-
 ## 🛠️ Install
 
 ### 📦 Package 설치
