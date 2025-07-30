@@ -70,8 +70,8 @@ pip install -e .
 - `custom_constants.py`: `JOINT_NAMES`, `START_ARM_POSE` 정의
 - `custom_robot_utils.py`: `Recorder`에서 확장된 state 정의
 - `custom_imitate_episodes.py`: `state_dim` 수정
-- `detr_vae.py`: state 및 action 처리 수정
-- `utils.py`: dtype 변경
+- `detr_vae.py`: state(qpos) & action=14 -> state(qpos) & action = 7
+- `utils.py`: dtype 변경(float64 -> float32)
 
 ### ✅ qvel, qeffort 추가 시
 
