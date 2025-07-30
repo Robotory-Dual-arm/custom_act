@@ -97,7 +97,7 @@ pip install -e .
 2. `Recorder` 클래스에서 IP 설정
 3. 로봇/그리퍼에 맞게 제어 명령 설정
 
-### ▶ 실행 명령어
+### ▶ Collect DEMO_DATA 실행 명령어
 
 #### 그리퍼 연결
 
@@ -140,7 +140,7 @@ rosrun custom_act record_hdf5_act_form.py
   1. `<DATA_DIR>/<TASK_NAME>`에 DEMO_DATA 존재 확인
   2. `num_episodes`와 데이터 수 일치 확인
 
-### ▶ 실행 명령어
+### ▶ Train 실행 명령어
 
 ```bash
 conda activate aloha 
@@ -160,7 +160,7 @@ rosrun custom_act custom_imitate_episodes.py \
 - `episode_len`이 커지면 rollout 길이도 늘어남
 - `Collect DEMO_DATA` 시 episode_len과 달라도 됨
 
-### ▶ 실행 명령어
+### ▶ Inference 실행 명령어
 
 #### 그리퍼 연결
 
@@ -168,7 +168,7 @@ rosrun custom_act custom_imitate_episodes.py \
 roslaunch onrobot_rg_control bringup.launch gripper:=rg2 ip:=192.168.1.1
 ```
 
-#### 추론 실행
+#### Inference 실행
 
 ```bash
 conda activate aloha
